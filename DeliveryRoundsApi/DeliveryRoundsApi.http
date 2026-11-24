@@ -1,0 +1,203 @@
+@host = http://localhost:5127
+@roundId = 1
+@fullRoundId = 2
+@newRoundId = 5
+@newStopId = 8
+@token = PASTE_YOUR_TOKEN_HERE
+
+### All rounds → 200
+GET {{host}}/rounds
+
+### Specific round with stops → 200
+GET {{host}}/rounds/{{roundId}}
+
+### Round that does not exist → 404
+GET {{host}}/rounds/999
+
+### New round → 201
+POST {{host}}/rounds
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "name": "Merelbeke middag",
+    "date": "2026-11-25",
+    "driverName": "Sengül Karakaya",
+    "maxStops": 5
+}
+
+### New round with unvalid data → 400
+POST {{host}}/rounds
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "name": "",
+    "date": "2026-11-25",
+    "driverName": "Sengül Karakaya",
+    "maxStops": 0
+}
+
+### Update round → 204
+PUT {{host}}/rounds/{{newRoundId}}
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "name": "Merelbeke namiddag",
+    "date": "2026-11-25",
+    "driverName": "Sengül Karakaya",
+    "maxStops": 6
+}
+
+### Update round that does not exist → 404
+PUT {{host}}/rounds/999
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "name": "Bestaat niet",
+    "date": "2026-11-25",
+    "driverName": "Sengül Karakaya",
+    "maxStops": 6
+}
+
+### Stops of a round → 200
+GET {{host}}/rounds/{{roundId}}/stops
+
+### Stops of a round that does not exist → 404
+GET {{host}}/rounds/999/stops
+
+### New stop → 201
+POST {{host}}/rounds/{{roundId}}/stops
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "address": "Brakelstraat 9, 9830 Sint-Martens-Latem",
+    "recipientName": "Lies Peeters"
+}
+
+### New stop with unvalid data → 400
+POST {{host}}/rounds/{{roundId}}/stops
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "address": "",
+    "recipientName": ""
+}
+
+### New stop on a full round (Gent centrum middag) → 409
+POST {{host}}/rounds/{{fullRoundId}}/stops
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "address": "Veldstraat 10, 9000 Gent",
+    "recipientName": "Bram Claes"
+}
+
+### New stop on a round that does not exist → 404
+POST {{host}}/rounds/999/stops
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "address": "Nergensstraat 1, 9000 Gent",
+    "recipientName": "Niemand"
+}
+
+### Delete stop → 204
+DELETE {{host}}/stops/{{newStopId}}
+Authorization: Bearer {{token}}
+
+### Delete stop that does not exist → 404
+DELETE {{host}}/stops/999
+Authorization: Bearer {{token}}
+
+### Delete round → 204
+DELETE {{host}}/rounds/{{newRoundId}}
+Authorization: Bearer {{token}}
+
+### Delete round that does not exist → 404
+DELETE {{host}}/rounds/999
+Authorization: Bearer {{token}}
+
+### ===== Without token =====
+
+### New round without token → 401
+POST {{host}}/rounds
+Content-Type: application/json
+
+{
+    "name": "Zonder token",
+    "date": "2026-11-25",
+    "driverName": "Sengül Karakaya",
+    "maxStops": 5
+}
+
+### New stop without token → 401
+POST {{host}}/rounds/{{roundId}}/stops
+Content-Type: application/json
+
+{
+    "address": "Teststraat 1, 9000 Gent",
+    "recipientName": "Test"
+}
+
+### ===== Authentication =====
+
+### Register → 200
+POST {{host}}/auth/register
+Content-Type: application/json
+
+{
+    "username": "sengul",
+    "password": "geheim123"
+}
+
+### Register with an existing username → 409
+POST {{host}}/auth/register
+Content-Type: application/json
+
+{
+    "username": "sengul",
+    "password": "geheim123"
+}
+
+### Register with invalid data → 400
+POST {{host}}/auth/register
+Content-Type: application/json
+
+{
+    "username": "ab",
+    "password": "123"
+}
+
+### Login → 200 (copy the token into @token at the top)
+POST {{host}}/auth/login
+Content-Type: application/json
+
+{
+    "username": "sengul",
+    "password": "geheim123"
+}
+
+### Login with wrong password → 401
+POST {{host}}/auth/login
+Content-Type: application/json
+
+{
+    "username": "sengul",
+    "password": "foutwachtwoord"
+}
+
+### Login with unknown username → 401
+POST {{host}}/auth/login
+Content-Type: application/json
+
+{
+    "username": "bestaatniet",
+    "password": "geheim123"
+}
